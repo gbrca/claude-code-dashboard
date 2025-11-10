@@ -39,14 +39,15 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<IDashboardService, DashboardService>();
 
-// Configure CORS
+// Configure CORS for development (React dev server on port 3000)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5000", "https://localhost:5001")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -59,15 +60,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseStaticFiles();
 app.UseCors("AllowAll");
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Serve the dashboard UI
+// SPA fallback - serve index.html for all non-API routes
 app.MapFallbackToFile("index.html");
 
 app.Run();
